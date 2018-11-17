@@ -8,6 +8,9 @@ if (!defined('_PS_VERSION_')) {
 	exit;
 }
 
+/**
+ * Module main class
+ */
 class DeveloperPack extends Module
 {
 	public function __construct()
