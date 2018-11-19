@@ -178,12 +178,12 @@ class DeveloperPackAjax
 
     public function zipped() {
         $files = array_diff(scandir(realpath('zip')), array('.', '..', '.keep'));
-        $res = [];
+        $res = array();
         foreach ($files as $file) {
-            $res[] = [
+            $res[] = array(
                 'name' => $file,
                 'size' => $this->humanFileSize(filesize('zip/'.$file))
-            ];
+            );
         }
         $this->end($res);
     }
@@ -212,17 +212,17 @@ class DeveloperPackAjax
             $size += $file->getSize();
             $d++;
         }
-        $this->end([
+        $this->end(array(
             'total' => $d,
             'size' => $this->humanFileSize($size),
             'execution_time' => (microtime(true) - $start).'s'
-        ]);
+        ));
     }
 
     public function test() {
-        $res = [
+        $res = array(
             'url' => _PS_BASE_URL_.__PS_BASE_URI__
-        ];
+        );
         $this->end($res);
     }
 }

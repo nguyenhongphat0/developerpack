@@ -20,10 +20,10 @@ class DeveloperPack extends Module
 		$this->version = '1.0.0';
 		$this->author = 'nguyenhongphat0';
 		$this->need_instance = 0;
-		$this->ps_versions_compliancy = [
+		$this->ps_versions_compliancy = array(
 			'min' => '1.6',
 			'max' => _PS_VERSION_
-		];
+		);
 		$this->bootstrap = true;
 
 		parent::__construct();
@@ -33,8 +33,8 @@ class DeveloperPack extends Module
 
 		$this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
 
-		if (!Configuration::get('version')) {
-			$this->warning = $this->l('No version provided');
+		if (!Configuration::get('foo')) {
+			$this->warning = $this->l('No foo provided');
 		}
 	}
 
@@ -59,11 +59,11 @@ class DeveloperPack extends Module
     }
 
 	public function displayConfiguration() {
-		$this->context->smarty->assign([
+		$this->context->smarty->assign(array(
 			'foo' => Configuration::get('foo'),
 			'root' => __PS_BASE_URI__,
 			'version' => _PS_VERSION_
-		]);
+		));
 		return $this->display(__FILE__, 'views/templates/admin/index.tpl');
 	}
 }
