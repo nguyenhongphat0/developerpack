@@ -74,16 +74,22 @@ class DeveloperPackAjax
         $this->end($r);
     }
 
+    private function listFiles($path) {
+        $project = realpath($path);
+        $directory = new RecursiveDirectoryIterator($project);
+        $files = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
+        return $files;
+    }
+
     private function archive($regex, $output, $maxsize, $timeout) {
         // Extend excecute limit
         if (isset($timeout)) {
             set_time_limit($timeout);
         }
 
-        // Get real path for our folder
+        // Get files in directory
         $project = realpath('../..');
-        $directory = new RecursiveDirectoryIterator($project);
-        $files = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
+        $files = $this->listFiles($project);
 
         // Initialize archive object
         $zip = new ZipArchive();
@@ -212,8 +218,7 @@ class DeveloperPackAjax
     public function analize() {
         $start = microtime(true);
         $project = realpath('../..');
-        $directory = new RecursiveDirectoryIterator($project);
-        $files = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
+        $files = $this->listFiles($project);
         $size = $d = 0;
         foreach ($files as $name => $file) {
             $size += $file->getSize();
@@ -224,6 +229,20 @@ class DeveloperPackAjax
             'size' => $this->humanFileSize($size),
             'execution_time' => (microtime(true) - $start).'s'
         ));
+    }
+
+    public function open() {
+        $project = realpath('../..');
+        $file = $project.'/'.$_POST['file'];
+        $res = array();
+        if (file_exists($file)) {
+            $res['content'] = file_get_contents($file);
+            $res['status'] = 200;
+        } else {
+            $res['status'] = 404;
+            $res['message'] = 'File not found';
+        }
+        $this->end($res);
     }
 
     public function test() {

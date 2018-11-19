@@ -135,7 +135,7 @@
         </div>
         <div class="alert alert-success hidden" id="created-zip-alert">
             Zip file has been created successfully. Download it now: <a id="created-zip"></a>
-        <div>
+        </div>
     </div>
     <script type="text/javascript">
         function updateOptions(options) {
@@ -204,4 +204,16 @@
             });
         }
     </script>
+</div>
+
+<div class="panel">
+    <div class="panel-heading">Code editor</div>
+    <div class="form-group">
+        <label class="control-label">We use monaco for code editing</label>
+        <div class="input-group">
+            <div class="btn-group">
+                <a href="{$root}modules/developerpack/monaco.php" class="btn btn-primary" target="_blank">Open Monaco Now</a>
+            </div>
+        </div>
+    </div>
 </div>

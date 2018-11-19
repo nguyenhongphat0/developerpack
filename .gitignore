@@ -1,3 +1,3 @@
 zip/*
 !zip/.keep
-config.xml
+config*.xml
