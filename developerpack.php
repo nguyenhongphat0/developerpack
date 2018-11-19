@@ -61,7 +61,7 @@ class DeveloperPack extends Module
 	public function displayConfiguration() {
 		$this->context->smarty->assign([
 			'foo' => Configuration::get('foo'),
-			'root' => _PS_BASE_URL_.__PS_BASE_URI__,
+			'root' => __PS_BASE_URI__,
 			'version' => _PS_VERSION_
 		]);
 		return $this->display(__FILE__, 'views/templates/admin/index.tpl');
