@@ -37,11 +37,18 @@ class DeveloperPackAjax
     public function end($data, $code = 200)
     {
         header('Content-Type: application/json');
-        http_response_code($code);
+        if (function_exists('http_response_code')) {
+            http_response_code($code);
+        }
         die(json_encode($data));
     }
 
-    private function phpinfo() {
+    public function phpinforaw() {
+        phpinfo();
+        die();
+    }
+
+    public function phpinfo() {
         ob_start(); phpinfo(INFO_MODULES); $s = ob_get_contents(); ob_end_clean();
         $s = strip_tags($s, '<h2><th><td>');
         $s = preg_replace('/<th[^>]*>([^<]+)<\/th>/', '<info>\1</info>', $s);

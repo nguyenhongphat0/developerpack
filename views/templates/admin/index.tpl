@@ -21,6 +21,7 @@
                 <button class="btn btn-default" onclick="console.log(phpinfo)">Log to console</button>
                 <button class="btn btn-default" onclick="console.log(JSON.stringify(phpinfo, true, 4))">Log to console (expanded)</button>
                 <button class="btn btn-default" onclick="console.clear()">Clear console</button>
+                <a href="{$root}modules/developerpack/ajax.php?action=phpinforaw" target="_blank" class="btn btn-default" onclick="console.clear()">View raw</a>
             </div>
         </div>
     </div>
