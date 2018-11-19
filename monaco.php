@@ -111,6 +111,7 @@ if (!$is_admin || !$is_enabled) {
         </div>
     </div>
     <script type="text/javascript" src="vs/loader.js"></script>
+    <script type="text/javascript" src="vs/language/map.js"></script>
     <script type="text/javascript">
         require(['vs/editor/editor.main'], function (main) {
             var originalModel = monaco.editor.createModel('');
@@ -118,7 +119,8 @@ if (!$is_admin || !$is_enabled) {
 
             diffEditor = monaco.editor.createDiffEditor(document.getElementById("container"), {
             	// You can optionally disable the resizing
-            	enableSplitViewResizing: false
+            	enableSplitViewResizing: true,
+                language: 'javascript'
             });
             diffEditor.setModel({
             	original: originalModel,
@@ -139,6 +141,10 @@ if (!$is_admin || !$is_enabled) {
                 body,
             }).then(res => res.json());
         }
+        function extension(filename) {
+            var re = /(?:\.([^.]+))?$/;
+            return re.exec(filename)[1];
+        }
         function monacoOpen() {
             file = document.getElementById('file').value;
             developerDispatch({
@@ -156,7 +162,10 @@ if (!$is_admin || !$is_enabled) {
                     document.getElementById('file').className = 'error';
                     diffEditor.getOriginalEditor().setValue('');
                 }
+                var l = language[extension(file)];
                 console.clear();
+                monaco.editor.setModelLanguage(diffEditor.getOriginalEditor().getModel(), l);
+                monaco.editor.setModelLanguage(diffEditor.getModifiedEditor().getModel(), l);
                 console.log('Available access: ');
                 data.ls.forEach(e => console.log(e));
                 console.log('Current directory: ', data.pwd);
