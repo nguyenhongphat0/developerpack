@@ -53,21 +53,6 @@
             File deleted successfully
         </div>
         <script type="text/javascript">
-            function humanFileSize(bytes, si) {
-                var thresh = si ? 1000 : 1024;
-                if(Math.abs(bytes) < thresh) {
-                    return bytes + ' B';
-                }
-                var units = si
-                    ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-                    : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-                var u = -1;
-                do {
-                    bytes /= thresh;
-                    ++u;
-                } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-                return bytes.toFixed(1)+' '+units[u];
-            }
             function updateZipped() {
                 $('#zipped').html('');
                 developerDispatch({
@@ -83,7 +68,7 @@
                                         text: file.name
                                     })
                                 ),
-                                $('<td>' + humanFileSize(file.size) + '</td>'),
+                                $('<td>' + file.size + '</td>'),
                                 $('<td>').append(
                                     $('<button />', {
                                         class: 'btn btn-default',
@@ -103,6 +88,24 @@
                 });
             }
             updateZipped();
+        </script>
+    </div>
+    <div class="form-group">
+        <label class="control-label">Analize project</label>
+        <div class="input-group">
+            <div class="btn-group">
+                <button class="btn btn-default" onclick="analize(this)">Analize</button>
+            </div>
+        </div>
+        <p class="help-block" id="analize-result"></p>
+        <script type="text/javascript">
+            function analize(self) {
+                $(self).attr('disabled', 'disabled');
+                developerDispatch({
+                    action: 'analize'
+                }).then(res => $('#analize-result').text(JSON.stringify(res)));
+                $(self).removeAttr('disabled');
+            }
         </script>
     </div>
     <div class="form-group">

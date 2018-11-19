@@ -166,13 +166,23 @@ class DeveloperPackAjax
         $this->end($_POST['output']);
     }
 
+    private function humanFileSize($size, $unit="") {
+        if( (!$unit && $size >= 1<<30) || $unit == "GB")
+            return number_format($size/(1<<30),2)." GB";
+        if( (!$unit && $size >= 1<<20) || $unit == "MB")
+            return number_format($size/(1<<20),2)." MB";
+        if( (!$unit && $size >= 1<<10) || $unit == "KB")
+            return number_format($size/(1<<10),2)." KB";
+        return number_format($size)." bytes";
+    }
+
     public function zipped() {
         $files = array_diff(scandir(realpath('zip')), array('.', '..', '.keep'));
         $res = [];
         foreach ($files as $file) {
             $res[] = [
                 'name' => $file,
-                'size' => filesize('zip/'.$file)
+                'size' => $this->humanFileSize(filesize('zip/'.$file))
             ];
         }
         $this->end($res);
@@ -190,6 +200,23 @@ class DeveloperPackAjax
         } else {
             $this->end("File not found");
         }
+    }
+
+    public function analize() {
+        $start = microtime(true);
+        $project = realpath('../..');
+        $directory = new RecursiveDirectoryIterator($project);
+        $files = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
+        $size = $d = 0;
+        foreach ($files as $name => $file) {
+            $size += $file->getSize();
+            $d++;
+        }
+        $this->end([
+            'total' => $d,
+            'size' => $this->humanFileSize($size),
+            'execution_time' => (microtime(true) - $start).'s'
+        ]);
     }
 
     public function test() {
