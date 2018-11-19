@@ -81,6 +81,15 @@ if (!$is_admin || !$is_enabled) {
         background-color: #ddd;
         color: #21252b;
     }
+    #tools input[type=text].error {
+        background-color: #fca1a2;
+    }
+    #tools input[type=text].warning {
+        background-color: #fab604;
+    }
+    #tools input[type=text].success {
+        background-color: #6cca6e;
+    }
     #tools img {
         height: 20px;
         margin: 5px;
@@ -96,7 +105,7 @@ if (!$is_admin || !$is_enabled) {
             <img src="https://opensource.microsoft.com/img/microsoft.png" alt="">
         </div>
         <div id="right">
-            <input type="text" id="file">
+            <input type="text" id="file" onkeyup="monacoEnter(event)">
             <button onclick="monacoOpen()">Open</button>
             <button onclick="monacoSave()">Save</button>
         </div>
@@ -104,8 +113,8 @@ if (!$is_admin || !$is_enabled) {
     <script type="text/javascript" src="vs/loader.js"></script>
     <script type="text/javascript">
         require(['vs/editor/editor.main'], function (main) {
-            var originalModel = monaco.editor.createModel("This line is removed on the right.\njust some text\nabcd\nefgh\nSome more text", "text/plain");
-            var modifiedModel = monaco.editor.createModel("just some text\nabcz\nzzzzefgh\nSome more text.\nThis line is removed on the left.", "text/plain");
+            var originalModel = monaco.editor.createModel('');
+            var modifiedModel = monaco.editor.createModel('');
 
             diffEditor = monaco.editor.createDiffEditor(document.getElementById("container"), {
             	// You can optionally disable the resizing
@@ -131,21 +140,73 @@ if (!$is_admin || !$is_enabled) {
             }).then(res => res.json());
         }
         function monacoOpen() {
-            var file = document.getElementById('file').value;
-            console.log(file);
+            file = document.getElementById('file').value;
             developerDispatch({
                 action: 'open',
                 file
             }).then(data => {
-                diffEditor.getOriginalEditor().setValue(data.content);
-                diffEditor.getModifiedEditor().setValue(data.content);
+                if (data.status == 200) {
+                    document.getElementById('file').className = '';
+                    diffEditor.getOriginalEditor().setValue(data.content);
+                    diffEditor.getModifiedEditor().setValue(data.content);
+                } else if (data.status == 204) {
+                    document.getElementById('file').className = 'warning';
+                    diffEditor.getOriginalEditor().setValue('');
+                } else {
+                    document.getElementById('file').className = 'error';
+                    diffEditor.getOriginalEditor().setValue('');
+                }
+                console.clear();
+                console.log('Available access: ');
+                data.ls.forEach(e => console.log(e));
+                console.log('Current directory: ', data.pwd);
+                console.log('Message: ', data.message);
             });
         }
         function monacoSave() {
+            document.getElementById('file').value = file;
             var content = diffEditor.getModifiedEditor().getValue();
-
-            console.log(content);
+            if (content == '') {
+                var option = window.prompt('You are about to save a file with blank content. Type "delete" if you want to delete the file, or "save" if you really want to save the file "' + file + '"?');
+                if (option !== 'save') {
+                    if (option === 'delete') {
+                        developerDispatch({
+                            action: 'delete',
+                            file
+                        }).then(data => {
+                            monacoOpen();
+                            alert(data.message);
+                        });
+                    }
+                    return;
+                }
+            }
+            var confirm = window.confirm('Are you sure you want to make change to file "' + file + '"?');
+            if (!confirm) {
+                return;
+            }
+            developerDispatch({
+                action: 'save',
+                file,
+                content
+            }).then(data => {
+                if (data.status == 200) {
+                    document.getElementById('file').className = 'success';
+                    monacoOpen();
+                    alert(data.message);
+                } else {
+                    document.getElementById('file').className = 'error';
+                    alert(data.message);
+                }
+            });
         }
+        function monacoEnter(e) {
+            var code = (e.keyCode ? e.keyCode : e.which);
+            if(code == 13) {
+                monacoOpen();
+            }
+        }
+        file = '';
     </script>
 </body>
 </html>

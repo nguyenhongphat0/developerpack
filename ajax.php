@@ -233,14 +233,73 @@ class DeveloperPackAjax
 
     public function open() {
         $project = realpath('../..');
-        $file = $project.'/'.$_POST['file'];
-        $res = array();
-        if (file_exists($file)) {
+        $filename = $_POST['file'];
+        $file = $project.'/'.$filename;
+        $res = array(
+            'status' => 404,
+            'message' => 'List directory success'
+        );
+        if ($filename !== '' && is_file($file)) {
+            $file = $project.'/'.$_POST['file'];
             $res['content'] = file_get_contents($file);
             $res['status'] = 200;
+            $res['message'] = 'OK';
+        }
+        if (!is_dir($file)) {
+            $file = dirname($file);
+            if ($res['status'] != 200) {
+                $res['message'] = 'File or directory not found';
+            }
         } else {
-            $res['status'] = 404;
-            $res['message'] = 'File not found';
+            $res['status'] = 204;
+        }
+        $res['pwd'] = $file;
+        $ls = scandir($file);
+        $res['ls'] = $ls;
+        $this->end($res);
+    }
+
+    public function save() {
+        $project = realpath('../..');
+        $filename = $_POST['file'];
+        $content = $_POST['content'];
+        $file = $project.'/'.$filename;
+        if ($filename !== '' && is_file($file)) {
+            file_put_contents($file, $content);
+            $res = array(
+                'status' => 200,
+                'message' => 'File saved successfully!'
+            );
+        } else if ($filename !== '' && !is_dir($file)) {
+            file_put_contents($file, $content);
+            $res = array(
+                'status' => 200,
+                'message' => 'File created successfully!'
+            );
+        } else {
+            $res = array(
+                'status' => 404,
+                'message' => 'Error saving file!'
+            );
+        }
+        $this->end($res);
+    }
+
+    public function delete() {
+        $project = realpath('../..');
+        $filename = $_POST['file'];
+        $file = $project.'/'.$filename;
+        if ($filename !== '' && is_file($file)) {
+            unlink($file);
+            $res = array(
+                'status' => 200,
+                'message' => 'File deleted successfully!'
+            );
+        } else {
+            $res = array(
+                'status' => 404,
+                'message' => 'Nothing has been deleted!'
+            );
         }
         $this->end($res);
     }
