@@ -14,6 +14,8 @@ language = {
     go: 'go',
     handlebars: 'handlebars',
     html: 'html',
+    tpl: 'html',
+    twig: 'html',
     ini: 'ini',
     java: 'java',
     js: 'javascript',
