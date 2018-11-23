@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+
+  prestashop:
+    image: prestashop/prestashop
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+        - .:/var/www/html/modules/developerpack
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: prestashop
+      MYSQL_USER: prestashop
+      MYSQL_PASSWORD: prestashop
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
