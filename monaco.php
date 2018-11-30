@@ -1,8 +1,9 @@
 <?php
-/*
-*  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
-*  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
-*/
+/**
+ *  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
+ *  @copyright 2018 nguyenhongphat0
+ *  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
+ */
 
 // Load required permission before open monaco
 include_once('../../config/config.inc.php');
@@ -110,21 +111,26 @@ if (!$is_admin || !$is_enabled) {
             <button onclick="monacoSave()">Save</button>
         </div>
     </div>
-    <script type="text/javascript" src="vs/loader.js"></script>
-    <script type="text/javascript" src="vs/language/map.js"></script>
+    <script>
+        var require = { paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.15.6/min/vs' } };
+    </script>
+    <script type="text/javascript" src="views/js/map.js">
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.15.6/min/vs/loader.js">
+    </script>
     <script type="text/javascript">
         require(['vs/editor/editor.main'], function (main) {
             var originalModel = monaco.editor.createModel('');
             var modifiedModel = monaco.editor.createModel('');
 
             diffEditor = monaco.editor.createDiffEditor(document.getElementById("container"), {
-            	// You can optionally disable the resizing
-            	enableSplitViewResizing: true,
+                // You can optionally disable the resizing
+                enableSplitViewResizing: true,
                 language: 'javascript'
             });
             diffEditor.setModel({
-            	original: originalModel,
-            	modified: modifiedModel
+                original: originalModel,
+                modified: modifiedModel
             });
 
             window.addEventListener('resize', function () {
@@ -145,7 +151,7 @@ if (!$is_admin || !$is_enabled) {
             var re = /(?:\.([^.]+))?$/;
             return re.exec(filename)[1];
         }
-        function monacoOpen() {
+        function monacoOpen(setModified = true) {
             file = document.getElementById('file').value;
             developerDispatch({
                 action: 'open',
@@ -154,7 +160,9 @@ if (!$is_admin || !$is_enabled) {
                 if (data.status == 200) {
                     document.getElementById('file').className = '';
                     diffEditor.getOriginalEditor().setValue(data.content);
-                    diffEditor.getModifiedEditor().setValue(data.content);
+                    if (setModified) {
+                        diffEditor.getModifiedEditor().setValue(data.content);                    
+                    }
                 } else if (data.status == 204) {
                     document.getElementById('file').className = 'warning';
                     diffEditor.getOriginalEditor().setValue('');
@@ -176,14 +184,15 @@ if (!$is_admin || !$is_enabled) {
             document.getElementById('file').value = file;
             var content = diffEditor.getModifiedEditor().getValue();
             if (content == '') {
-                var option = window.prompt('You are about to save a file with blank content. Type "delete" if you want to delete the file, or "save" if you really want to save the file "' + file + '"?');
+                var option = window.prompt(`You are about to save a file with blank content. 
+Type "delete" if you want to delete the file, or "save" if you really want to save the file "${file}"?`);
                 if (option !== 'save') {
                     if (option === 'delete') {
                         developerDispatch({
                             action: 'delete',
                             file
                         }).then(data => {
-                            monacoOpen();
+                            monacoOpen(false);
                             alert(data.message);
                         });
                     }
@@ -201,7 +210,7 @@ if (!$is_admin || !$is_enabled) {
             }).then(data => {
                 if (data.status == 200) {
                     document.getElementById('file').className = 'success';
-                    monacoOpen();
+                    monacoOpen(false);
                     alert(data.message);
                 } else {
                     document.getElementById('file').className = 'error';

@@ -1,6 +1,7 @@
 <?php
-/*
+/**
  *  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
+ *  @copyright 2018 nguyenhongphat0
  *  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
  */
 
@@ -42,10 +43,9 @@ class DeveloperPack extends Module
     {
         $output = null;
         if (Tools::isSubmit('submit'.$this->name)) {
-            $myModuleName = strval(Tools::getValue('foo'));
+            $myModuleName = Tools::getValue('foo');
 
-            if (
-                !$myModuleName ||
+            if (!$myModuleName ||
                 empty($myModuleName) ||
                 !Validate::isGenericName($myModuleName)
             ) {
@@ -58,7 +58,8 @@ class DeveloperPack extends Module
         return $output.$this->displayConfiguration();
     }
 
-    public function displayConfiguration() {
+    public function displayConfiguration()
+    {
         $this->context->smarty->assign(array(
             'foo' => Configuration::get('foo'),
             'root' => __PS_BASE_URI__,
