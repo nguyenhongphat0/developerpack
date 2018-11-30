@@ -1,7 +1,12 @@
+{*
+* @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
+* @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
+*}
+
 <script type="text/javascript">
     function developerDispatch(data) {
         return $.ajax({
-            url: '{$root}modules/developerpack/ajax.php',
+            url: '{$root|escape:'htmlall':'UTF-8'}modules/developerpack/ajax.php',
             method: 'POST',
             data
         });
@@ -12,7 +17,7 @@
     <div class="panel-heading">Information</div>
     <div class="form-group">
         <label class="control-label">Prestashop Version</label>
-        <p class="help-block">{$version}</p>
+        <p class="help-block">{$version|escape:'htmlall':'UTF-8'}</p>
     </div>
     <div class="form-group">
         <label class="control-label">PHP Info</label>
@@ -21,7 +26,7 @@
                 <button class="btn btn-default" onclick="console.log(phpinfo)">Log to console</button>
                 <button class="btn btn-default" onclick="console.log(JSON.stringify(phpinfo, true, 4))">Log to console (expanded)</button>
                 <button class="btn btn-default" onclick="console.clear()">Clear console</button>
-                <a href="{$root}modules/developerpack/ajax.php?action=phpinforaw" target="_blank" class="btn btn-default" onclick="console.clear()">View raw</a>
+                <a href="{$root|escape:'htmlall':'UTF-8'}modules/developerpack/ajax.php?action=phpinforaw" target="_blank" class="btn btn-default" onclick="console.clear()">View raw</a>
             </div>
         </div>
     </div>
@@ -65,7 +70,7 @@
                             $('<tr>').append(
                                 $('<td>').append(
                                     $('<a>', {
-                                        href: '{$root}modules/developerpack/zip/' + file.name,
+                                        href: '{$root|escape:'htmlall':'UTF-8'}modules/developerpack/zip/' + file.name,
                                         text: file.name
                                     })
                                 ),
@@ -193,7 +198,7 @@
             let options = JSON.parse($('#zip-options').val());
             developerDispatch(options).then(res => {
                 updateZipped();
-                $('#created-zip').attr('href', '{$root}modules/developerpack/zip/' + res);
+                $('#created-zip').attr('href', '{$root|escape:'htmlall':'UTF-8'}modules/developerpack/zip/' + res);
                 $('#created-zip').text(res);
                 $('#created-zip-alert').removeClass('hidden');
                 $(self).removeAttr('disabled')
@@ -212,7 +217,7 @@
         <label class="control-label">We use monaco for code editing</label>
         <div class="input-group">
             <div class="btn-group">
-                <a href="{$root}modules/developerpack/monaco.php" class="btn btn-primary" target="_blank">Open Monaco Now</a>
+                <a href="{$root|escape:'htmlall':'UTF-8'}modules/developerpack/monaco.php" class="btn btn-primary" target="_blank">Open Monaco Now</a>
             </div>
         </div>
     </div>

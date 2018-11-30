@@ -1,8 +1,9 @@
 <?php
-/*
-*  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
-*  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
-*/
+/**
+ *  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
+ *  @copyright 2018 nguyenhongphat0
+ *  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
+ */
 
 include_once('../../config/config.inc.php');
 include_once('../../init.php');
@@ -22,11 +23,7 @@ class DeveloperPackAjax
             $this->end('Access dinied', 403);
         }
         // Call to action
-        if (isset($_GET['action'])) {
-            $action = $_GET['action'];
-        } else {
-            $action = $_POST['action'];
-        }
+        $action = Tools::getValue('action');
         if (method_exists($this, $action)) {
             $this->$action();
         } else {
@@ -43,18 +40,24 @@ class DeveloperPackAjax
         die(json_encode($data));
     }
 
-    public function phpinforaw() {
+    public function phpinforaw()
+    {
         phpinfo();
         die();
     }
 
-    public function phpinfo() {
-        ob_start(); phpinfo(INFO_MODULES); $s = ob_get_contents(); ob_end_clean();
+    public function phpinfo()
+    {
+        ob_start();
+        phpinfo(INFO_MODULES);
+        $s = ob_get_contents();
+        ob_end_clean();
         $s = strip_tags($s, '<h2><th><td>');
         $s = preg_replace('/<th[^>]*>([^<]+)<\/th>/', '<info>\1</info>', $s);
         $s = preg_replace('/<td[^>]*>([^<]+)<\/td>/', '<info>\1</info>', $s);
         $t = preg_split('/(<h2[^>]*>[^<]+<\/h2>)/', $s, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $r = array(); $count = count($t);
+        $r = array();
+        $count = count($t);
         $p1 = '<info>([^<]+)<\/info>';
         $p2 = '/'.$p1.'\s*'.$p1.'\s*'.$p1.'/';
         $p3 = '/'.$p1.'\s*'.$p1.'/';
@@ -62,7 +65,7 @@ class DeveloperPackAjax
             if (preg_match('/<h2[^>]*>([^<]+)<\/h2>/', $t[$i], $matchs)) {
                 $name = trim($matchs[1]);
                 $vals = explode("\n", $t[$i + 1]);
-                foreach ($vals AS $val) {
+                foreach ($vals as $val) {
                     if (preg_match($p2, $val, $matchs)) { // 3cols
                         $r[$name][trim($matchs[1])] = array(trim($matchs[2]), trim($matchs[3]));
                     } elseif (preg_match($p3, $val, $matchs)) { // 2cols
@@ -74,16 +77,18 @@ class DeveloperPackAjax
         $this->end($r);
     }
 
-    private function listFiles($path) {
+    private function listFiles($path)
+    {
         $project = realpath($path);
         $directory = new RecursiveDirectoryIterator($project);
         $files = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::LEAVES_ONLY);
         return $files;
     }
 
-    private function archive($regex, $output, $maxsize, $timeout) {
+    private function archive($regex, $output, $maxsize, $timeout)
+    {
         // Extend excecute limit
-        if (isset($timeout)) {
+        if (Tools::getIsset($timeout)) {
             set_time_limit($timeout);
         }
 
@@ -95,15 +100,13 @@ class DeveloperPackAjax
         $zip = new ZipArchive();
         $zip->open($output, ZipArchive::CREATE | ZipArchive::OVERWRITE);
 
-        foreach ($files as $name => $file)
-        {
+        foreach ($files as $name => $file) {
             // Skip directories (they would be added automatically)
             $ok = (preg_match($regex, $name)) && (!$file->isDir()) && ($file->getSize() < $maxsize);
-            if ($ok)
-            {
+            if ($ok) {
                 // Get real and relative path for current file
                 $filePath = $file->getRealPath();
-                $relativePath = substr($filePath, strlen($project) + 1);
+                $relativePath = Tools::substr($filePath, Tools::strlen($project) + 1);
 
                 // Add current file to archive
                 $zip->addFile($filePath, $relativePath);
@@ -114,29 +117,33 @@ class DeveloperPackAjax
         $zip->close();
     }
 
-    private function implodeOptions($options) {
-        function escape($path)
-        {
-            $project = realpath('../..');
-            if (substr($path, 0, 1) === "/") {
-                $path = $project.$path;
-            }
-            $path = str_replace('.', '\.', $path);
-            $path = str_replace('/', '\/', $path);
-            return($path);
+    private function escape($path)
+    {
+        $project = realpath('../..');
+        if (Tools::substr($path, 0, 1) === "/") {
+            $path = $project.$path;
         }
-        $options = array_map("escape", $options);
+        $path = str_replace('.', '\.', $path);
+        $path = str_replace('/', '\/', $path);
+        return($path);
+    }
+
+    private function implodeOptions($options)
+    {
+        $options = array_map(array($this, 'escape'), $options);
         $regex = implode('|', $options);
         return $regex;
     }
 
-    private function includeFiles($includes) {
+    private function includeFiles($includes)
+    {
         $regex = $this->implodeOptions($includes);
         $regex = '/^.*('.$regex.').*$/i';
         return $regex;
     }
 
-    private function excludeFiles($excludes) {
+    private function excludeFiles($excludes)
+    {
         $regex = $this->implodeOptions($excludes);
         $regex = '/^((?!'.$regex.').)*$/i';
         return $regex;
@@ -144,10 +151,10 @@ class DeveloperPackAjax
 
     public function zip()
     {
-        $files = $_POST['files'];
-        $timeout = $_POST['timeout'];
-        if (isset($_POST['maxsize'])) {
-            $maxsize = $_POST['maxsize'];
+        $files = Tools::getValue('files');
+        $timeout = Tools::getValue('timeout');
+        if (Tools::getIsset(Tools::getValue('maxsize'))) {
+            $maxsize = Tools::getValue('maxsize');
         } else {
             $maxsize = 1000000;
         }
@@ -160,7 +167,7 @@ class DeveloperPackAjax
                 $this->end('Empty rules are not allowed', 404);
             }
         }
-        $rules = $_POST['rule'];
+        $rules = Tools::getValue('rule');
         switch ($rules) {
             case 'include':
                 $regex = $this->includeFiles($files);
@@ -174,23 +181,29 @@ class DeveloperPackAjax
                 $this->end('Invalid rule', 404);
                 break;
         }
-        $output = 'zip/'.$_POST['output'];
+        mkdir('zip');
+        $output = 'zip/'.Tools::getValue('output');
         $this->archive($regex, $output, $maxsize, $timeout);
-        $this->end($_POST['output']);
+        $this->end(Tools::getValue('output'));
     }
 
-    private function humanFileSize($size, $unit="") {
-        if( (!$unit && $size >= 1<<30) || $unit == "GB")
-            return number_format($size/(1<<30),2)." GB";
-        if( (!$unit && $size >= 1<<20) || $unit == "MB")
-            return number_format($size/(1<<20),2)." MB";
-        if( (!$unit && $size >= 1<<10) || $unit == "KB")
-            return number_format($size/(1<<10),2)." KB";
+    private function humanFileSize($size, $unit = "")
+    {
+        if ((!$unit && $size >= 1<<30) || $unit == "GB") {
+            return number_format($size/(1<<30), 2)." GB";
+        }
+        if ((!$unit && $size >= 1<<20) || $unit == "MB") {
+            return number_format($size/(1<<20), 2)." MB";
+        }
+        if ((!$unit && $size >= 1<<10) || $unit == "KB") {
+            return number_format($size/(1<<10), 2)." KB";
+        }
         return number_format($size)." bytes";
     }
 
-    public function zipped() {
-        $files = array_diff(scandir(realpath('zip')), array('.', '..', '.keep'));
+    public function zipped()
+    {
+        $files = array_diff(scandir(realpath('zip')), array('.', '..'));
         $res = array();
         foreach ($files as $file) {
             $res[] = array(
@@ -201,8 +214,9 @@ class DeveloperPackAjax
         $this->end($res);
     }
 
-    public function dearchive() {
-        $file = $_POST['file'];
+    public function dearchive()
+    {
+        $file = Tools::getValue('file');
         if (strpos($file, '..') !== false) {
             $this->end('Invalid file name');
         }
@@ -215,12 +229,13 @@ class DeveloperPackAjax
         }
     }
 
-    public function analize() {
+    public function analize()
+    {
         $start = microtime(true);
         $project = realpath('../..');
         $files = $this->listFiles($project);
         $size = $d = 0;
-        foreach ($files as $name => $file) {
+        foreach ($files as $file) {
             $size += $file->getSize();
             $d++;
         }
@@ -231,17 +246,18 @@ class DeveloperPackAjax
         ));
     }
 
-    public function open() {
+    public function open()
+    {
         $project = realpath('../..');
-        $filename = $_POST['file'];
+        $filename = Tools::getValue('file');
         $file = $project.'/'.$filename;
         $res = array(
             'status' => 404,
             'message' => 'List directory success'
         );
         if ($filename !== '' && is_file($file)) {
-            $file = $project.'/'.$_POST['file'];
-            $res['content'] = file_get_contents($file);
+            $file = $project.'/'.Tools::getValue('file');
+            $res['content'] = Tools::file_get_contents($file);
             $res['status'] = 200;
             $res['message'] = 'OK';
         }
@@ -259,10 +275,11 @@ class DeveloperPackAjax
         $this->end($res);
     }
 
-    public function save() {
+    public function save()
+    {
         $project = realpath('../..');
-        $filename = $_POST['file'];
-        $content = $_POST['content'];
+        $filename = Tools::getValue('file');
+        $content = Tools::getValue('content');
         $file = $project.'/'.$filename;
         if ($filename !== '' && is_file($file)) {
             file_put_contents($file, $content);
@@ -270,7 +287,7 @@ class DeveloperPackAjax
                 'status' => 200,
                 'message' => 'File saved successfully!'
             );
-        } else if ($filename !== '' && !is_dir($file)) {
+        } elseif ($filename !== '' && !is_dir($file)) {
             file_put_contents($file, $content);
             $res = array(
                 'status' => 200,
@@ -285,9 +302,10 @@ class DeveloperPackAjax
         $this->end($res);
     }
 
-    public function delete() {
+    public function delete()
+    {
         $project = realpath('../..');
-        $filename = $_POST['file'];
+        $filename = Tools::getValue('file');
         $file = $project.'/'.$filename;
         if ($filename !== '' && is_file($file)) {
             unlink($file);
@@ -304,7 +322,8 @@ class DeveloperPackAjax
         $this->end($res);
     }
 
-    public function test() {
+    public function test()
+    {
         $res = array(
             'url' => _PS_BASE_URL_.__PS_BASE_URI__
         );

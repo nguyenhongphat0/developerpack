@@ -1,3 +1,8 @@
+/**
+ *  @author nguyenhongphat0 <nguyenhongphat28121998@gmail.com>
+ *  @license https://www.gnu.org/licenses/gpl-3.0.html GPL-3.0
+ */
+
 language = {
     apex: 'apex',
     azcli: 'azcli',
