@@ -279,7 +279,7 @@ class DeveloperPackAjax
     {
         $project = realpath('../..');
         $filename = Tools::getValue('file');
-        $content = Tools::getValue('content');
+        $content = $_POST['content'];
         $file = $project.'/'.$filename;
         if ($filename !== '' && is_file($file)) {
             file_put_contents($file, $content);

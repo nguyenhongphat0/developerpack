@@ -18,7 +18,7 @@ class DeveloperPack extends Module
     {
         $this->name = 'developerpack';
         $this->tab = 'administration';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'nguyenhongphat0';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array(
