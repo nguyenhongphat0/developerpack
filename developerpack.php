@@ -33,35 +33,11 @@ class DeveloperPack extends Module
         $this->description = $this->l('This modules contain everything a prestashop developer need.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-
-        if (!Configuration::get('foo')) {
-            $this->warning = $this->l('No foo provided');
-        }
     }
 
     public function getContent()
     {
-        $output = null;
-        if (Tools::isSubmit('submit'.$this->name)) {
-            $myModuleName = Tools::getValue('foo');
-
-            if (!$myModuleName ||
-                empty($myModuleName) ||
-                !Validate::isGenericName($myModuleName)
-            ) {
-                $output .= $this->displayError($this->l('Invalid Configuration value'));
-            } else {
-                Configuration::updateValue('foo', $myModuleName);
-                $output .= $this->displayConfirmation($this->l('Settings updated'));
-            }
-        }
-        return $output.$this->displayConfiguration();
-    }
-
-    public function displayConfiguration()
-    {
         $this->context->smarty->assign(array(
-            'foo' => Configuration::get('foo'),
             'root' => __PS_BASE_URI__,
             'version' => _PS_VERSION_
         ));
